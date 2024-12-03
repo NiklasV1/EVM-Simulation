@@ -35,14 +35,40 @@ def unimplemented(opcode: str):
 
 if __name__ == "__main__":
     
-    world_state = {}
-    
-    
     # * Read input parameters
+    # Parameter format: --param_name=param_value
+    # Parameters:
+    # from:     address     |   Sender account address (must be EOA)
+    # to:       address     |   Receiver address
+    # value:    int         |   Ether amount in Wei
+    # data:     str         |   Calldata string (optional)
+    # gas:      int         |   Maximum amount of gas for the transaction
+    
+    i_from = ""
+    i_to = ""
+    i_value = 0
+    i_data = ""
+    i_gas = 0
+    
+    # TODO implement CLI input parameters
         
     
     # * Read most recent world state
+    world_state = {}
     with open("./WorldState.txt", 'r') as world_state_file:
         world_state = parse_world_state(world_state_file.readlines()[-1])
         
     print(world_state)
+    
+    
+    # * Make transaction
+    # Required parameters:
+    # from:     address     |   Origin address
+    # to:       address     |   Receiver address
+    # nonce:    int         |   Origin nonce
+    # value:    int         |   Ether amount in Wei
+    # data:     str         |   Calldata string
+    # gas:      int         |   Maximum amount of gas for the transaction
+    
+    # Structure:
+    #
