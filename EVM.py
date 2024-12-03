@@ -14,8 +14,8 @@ def parse_world_state(raw_state: str) -> dict:
         
         contract_fields = contract.split(';')
         world_state.update({contract_fields[0]: {
-            "nonce": contract_fields[1],
-            "balance": contract_fields[2],
+            "nonce": int(contract_fields[1]),
+            "balance": int(contract_fields[2]),
             "storage": parse_storage(contract_fields[3]),
             "code": contract_fields[4],
             "code_hash": contract_fields[5],
@@ -24,14 +24,41 @@ def parse_world_state(raw_state: str) -> dict:
     return world_state
         
 
-def revert():
+def revert(message: str):
+    print(message)
     print("Call reverted!")
     exit(1)
     
 def unimplemented(opcode: str):
-    print(f"Opcode: {opcode} is currnetly unimplemented!")
-    revert()
+    revert(f"Opcode: {opcode} is currnetly unimplemented!")
+    
+def is_account(address: str) -> bool:
+    return world_state.get(address) != None
 
+def is_eoa(address: str) -> bool:
+    if not is_account(address):
+        return False
+    account = get_account(address)
+    
+    if account.get("code") != ' ':
+        return False
+    
+    return True
+    
+
+def get_account(address: str) -> dict:
+    account = world_state.get(address)
+    if not account:
+        revert("Account does not exist!")
+    return account
+
+def get_eoa(address: str) -> dict:
+    account = get_account(address)
+    
+    if account.get("code") != ' ':
+        revert("Account is not externally owned!")
+    
+    return account
 
 if __name__ == "__main__":
     
@@ -44,7 +71,7 @@ if __name__ == "__main__":
     # data:     str         |   Calldata string (optional)
     # gas:      int         |   Maximum amount of gas for the transaction
     
-    i_from = ""
+    i_from = "4838b106fce9647bdf1e7877bf73ce8b0bad5f40"
     i_to = ""
     i_value = 0
     i_data = ""
@@ -54,9 +81,13 @@ if __name__ == "__main__":
         
     
     # * Read most recent world state
-    world_state = {}
+    global world_state
+    
     with open("./WorldState.txt", 'r') as world_state_file:
         world_state = parse_world_state(world_state_file.readlines()[-1])
+        
+    if not world_state:
+        revert("Loading world state failed!")
         
     print(world_state)
     
@@ -70,5 +101,39 @@ if __name__ == "__main__":
     # data:     str         |   Calldata string
     # gas:      int         |   Maximum amount of gas for the transaction
     
-    # Structure:
-    #
+    
+    # Check sender validity (exists and is EOA)
+    sender = get_eoa(i_from)
+    
+    # Set from
+    p_from = i_from
+    
+    # Set transaction origin address
+    tx_origin = i_from
+    
+    # Set to
+    p_to = i_to
+    
+    # Set nonce
+    p_nonce = sender.get("nonce")
+    
+    # Check value validity
+    
+    # Set calldata
+    
+    # set gas
+    
+    # Make transaction
+    
+    # Increase nonce
+    
+    # Save new world state
+    
+    
+        
+    
+    
+        
+    
+    
+    
