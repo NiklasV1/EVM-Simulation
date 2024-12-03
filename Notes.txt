@@ -1,0 +1,29 @@
+EVM.c handles transactions and executes bytecode.
+WorldState.txt stores one world state per line.
+
+
+World state format definitions:
+
+
+Account format:
+x<Address>;<Nonce>;<Balance>;<Storage>;<Code>;<CodeHash>
+
+Storage format:
+<Key1>:<Value1>|<Key2>:<Value2>
+
+Address: 20 byte address stored in hexadecimal
+Nonce: Number of transactions originating from this account for EOAs | Number of contracts created by this account for contracts | Starting value: 0
+Balance: Ether balance of the account in Wei
+Storage: List of used storage slots of the account | ' ' if empty or for EOAs
+    Key: 32 byte word stored in hexadecimal
+    Value: 32 byte word stored in hexadecimal
+Code: Bytecode of the contract | ' ' for EOAs
+Code Hash: keccak256 hash of the contract code stored in hexadecimal | ' ' for EOAs
+
+Examples:
+
+EOA:
+x4838b106fce9647bdf1e7877bf73ce8b0bad5f40;0;5000; ; ; 
+
+TODO: contract example
+
