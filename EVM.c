@@ -6,7 +6,7 @@ main()
     // Program counter
     // Stack
     // Remaining gas
-    // Mempry
+    // Memory
     
     // V-ROM (Current contract bytecode)
 
