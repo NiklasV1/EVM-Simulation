@@ -3,30 +3,49 @@ Current-World-State-Number.txt stores the number of the current world state.
 World-States folder contains all world states as .csv files.
 
 
-World state format definitions:
+World state file format:
 
-Account format:
+Address;Nonce;Balance;Storage;Code;CodeHash
+<Address1>;<Nonce1>;<Balance1>;<Storage1>;<Code1>;<CodeHash1>
+<Address2>;<Nonce2>;<Balance2>;<Storage2>;<Code2>;<CodeHash2>
+<Address3>;<Nonce3>;<Balance3>;<Storage3>;<Code3>;<CodeHash3>
+<Address4>;<Nonce4>;<Balance4>;<Storage4>;<Code4>;<CodeHash4>
+...
 
 
-Account format:
-## TODO refactor x<Address>;<Nonce>;<Balance>;<Storage>;<Code>;<CodeHash>
+Address: 
+    - 20 byte address stored in hexadecimal
 
-Storage format:
-<Key1>:<Value1>|<Key2>:<Value2>
+Nonce:
+    - EOA: Number of transactions originating from this account
+    - Contract: Number of contracts created by this account
+    - Starting value: 0
 
-Address: 20 byte address stored in hexadecimal
-Nonce: Number of transactions originating from this account for EOAs | Number of contracts created by this account for contracts | Starting value: 0
-Balance: Ether balance of the account in Wei
-Storage: List of used storage slots of the account | ' ' if empty or for EOAs
-    Key: 32 byte word stored in hexadecimal
-    Value: 32 byte word stored in hexadecimal
-Code: Bytecode of the contract | ' ' for EOAs
-Code Hash: keccak256 hash of the contract code stored in hexadecimal | ' ' for EOAs
+Balance:
+    - Ether balance of the account in Wei
+
+Storage:
+    - List of used storage slots of the account
+    - Format: <Key1>:<Value1>|<Key2>:<Value2>
+    - Key: 32 byte word stored in hexadecimal
+    - Value: 32 byte word stored in hexadecimal
+    - 'X' if empty or for EOAs
+
+Code:
+    - Bytecode of the contract
+    - 'X' for EOAs
+
+Code Hash:
+    - keccak256 hash of the contract code stored in hexadecimal
+    - 'X' for EOAs
+
 
 Examples:
 
-EOA:
-x4838b106fce9647bdf1e7877bf73ce8b0bad5f40;0;5000; ; ; 
+EOAs:
+Address;Nonce;Balance;Storage;Code;CodeHash
+x4838b106fce9647bdf1e7877bf73ce8b0bad5f40;0;5000;X;X;X
+x2056b106fce9647bdf1e7877bf73ce8b0bad5f40;0;3000;X;X;X
 
 TODO: contract example
 

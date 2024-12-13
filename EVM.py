@@ -1,28 +1,69 @@
 
 def parse_storage(raw_storage: str) -> dict:
-    if raw_storage == ' ':
-        return {}
     # TODO implement
+    pass
 
 
-def parse_world_state(raw_state: str) -> dict:
-    contracts = raw_state.split('x')
-    world_state = {}
+def parse_code(raw_code: str) -> list:
+    # TODO implement
+    pass
 
-    for contract in contracts:
-        if contract == '':
-            continue
 
-        contract_fields = contract.split(';')
-        world_state.update({contract_fields[0]: {
-            "nonce": int(contract_fields[1]),
-            "balance": int(contract_fields[2]),
-            "storage": parse_storage(contract_fields[3]),
-            "code": contract_fields[4],
-            "code_hash": contract_fields[5],
-        }})
+class AccountStorage:
 
-    return world_state
+    isEmpty:    bool
+    values:     dict
+
+    def __init__(self, storage_string: str):
+        if storage_string == 'X':
+            self.isEmpty = True
+            self.values = {}
+        else:
+            self.isEmpty = False
+            self.values = parse_storage(storage_string)
+
+
+class AccountCode:
+
+    isEmpty:    bool
+    bytecode:   list
+
+    def __init__(self, bytecode_string: str):
+        if bytecode_string == 'X':
+            self.isEmpty = True
+            self.bytecode = []
+        else:
+            self.isEmpty = False
+            self.bytecode = parse_code(bytecode_string)
+
+
+class Account:
+
+    address:    str
+    nonce:      int
+    balance:    int
+    storage:    AccountStorage
+    code:       AccountCode
+    code_hash:  str
+
+    def __init__(self,
+                 address:           str,
+                 nonce:             int,
+                 balance:           int,
+                 storage_string:    str,
+                 bytecode_string:   str,
+                 code_hash:         str):
+
+        self.address = address
+        self.nonce = nonce
+        self.balance = balance
+        self.storage = AccountStorage(storage_string)
+        self.code = AccountCode(bytecode_string)
+        self.code_hash = code_hash
+
+
+def read_world_state(raw_state: str) -> dict:
+    # TODO update
 
 
 def revert(message: str):
@@ -76,7 +117,7 @@ def check_balance(address: str, value: int):
         revert("Balance too low!")
 
 
-def saveWorldState():
+def write_world_state():
     # TODO implement
     pass
 
@@ -173,8 +214,7 @@ if __name__ == "__main__":
     # * Read most recent world state
     global world_state
 
-    with open("./WorldState.txt", 'r') as world_state_file:
-        world_state: dict = parse_world_state(world_state_file.readlines()[-1])
+    read_world_state()
 
     if not world_state:
         revert("Loading world state failed!")
@@ -194,4 +234,4 @@ if __name__ == "__main__":
     transaction(i_from, i_to, i_value, i_data, i_gas)
 
     # Save new world state
-    saveWorldState()
+    write_world_state()
