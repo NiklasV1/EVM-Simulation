@@ -1,12 +1,15 @@
 EVM.c handles transactions and executes bytecode.
-WorldState.txt stores one world state per line.
+Current-World-State-Number.txt stores the number of the current world state.
+World-States folder contains all world states as .csv files.
 
 
 World state format definitions:
 
+Account format:
+
 
 Account format:
-x<Address>;<Nonce>;<Balance>;<Storage>;<Code>;<CodeHash>
+## TODO refactor x<Address>;<Nonce>;<Balance>;<Storage>;<Code>;<CodeHash>
 
 Storage format:
 <Key1>:<Value1>|<Key2>:<Value2>

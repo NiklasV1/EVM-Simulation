@@ -81,9 +81,13 @@ def saveWorldState():
     pass
 
 
-def transfer_ether():
-    # TODO
-    pass
+def transfer_ether(sender: str, receiver: str, value: int):
+    sender_account = get_eoa(sender)
+    receiver_account = get_eoa(receiver)
+
+    sender_account.update({"balance": get_balance(sender) - value})
+    receiver_account.update({"balance": get_balance(receiver) + value})
+    print(f"Transfered {value} from {sender} to {receiver}.")
 
 
 def call_contract():
