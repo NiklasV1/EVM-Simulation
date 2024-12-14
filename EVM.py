@@ -22,11 +22,17 @@ class AccountStorage:
             self.isEmpty = False
             self.values = parse_storage(storage_string)
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.isEmpty:
             return 'X'
         # TODO
-        return "storage"
+        return "storageTODO"
+
+    def toCSV(self) -> str:
+        if self.isEmpty:
+            return 'X'
+        # TODO
+        return "storageTODO"
 
 
 class AccountCode:
@@ -42,10 +48,13 @@ class AccountCode:
             self.isEmpty = False
             self.bytecode = parse_code(bytecode_string)
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.isEmpty:
             return 'X'
         return ''.join(self.bytecode)
+
+    def toCSV(self) -> str:
+        return str(self)
 
 
 class Account:
@@ -72,13 +81,21 @@ class Account:
         self.code = AccountCode(bytecode_string)
         self.code_hash = code_hash
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Address: {self.address}, " +\
             f"Nonce: {self.nonce}, " +\
             f"Balance: {self.balance}, " +\
             f"Storage: {self.storage}, " +\
             f"Code: {self.code}, " +\
             f"Code Hash: {self.code_hash}"
+
+    def toCSV(self) -> str:
+        return f"{self.address};" +\
+            f"{self.nonce};" +\
+            f"{self.balance};" +\
+            f"{self.storage.toCSV()};" +\
+            f"{self.code.toCSV()};" +\
+            f"{self.code_hash}\n"
 
 
 def parse_account(line: str) -> Account:
@@ -174,8 +191,24 @@ def check_balance(address: str, value: int):
 
 def write_world_state(number: int):
     print_world_state(number)
-    # TODO implement
-    pass
+
+    print(f"Writing world state {number}.")
+
+    try:
+        with open(f"./World-States/State_{number}.csv", "w") as output_file:
+            lines = ["Address;Nonce;Balance;Storage;Code;CodeHash\n"]
+            for account in world_state.values():
+                lines += account.toCSV()
+            output_file.writelines(lines)
+
+        with open("./Current-World-State-Number.txt", "w") as number_file:
+            number_file.write(str(number))
+
+    except Exception as exception:
+        revert(f"Failed to write world state!\nException: {exception}")
+
+    else:
+        print("World state written successfully.")
 
 
 def transfer_ether(sender: str, receiver: str, value: int):
