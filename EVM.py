@@ -22,6 +22,12 @@ class AccountStorage:
             self.isEmpty = False
             self.values = parse_storage(storage_string)
 
+    def __str__(self):
+        if self.isEmpty:
+            return 'X'
+        # TODO
+        return "storage"
+
 
 class AccountCode:
 
@@ -35,6 +41,11 @@ class AccountCode:
         else:
             self.isEmpty = False
             self.bytecode = parse_code(bytecode_string)
+
+    def __str__(self):
+        if self.isEmpty:
+            return 'X'
+        return ''.join(self.bytecode)
 
 
 class Account:
@@ -61,9 +72,46 @@ class Account:
         self.code = AccountCode(bytecode_string)
         self.code_hash = code_hash
 
+    def __str__(self):
+        return f"Address: {self.address}, " +\
+            f"Nonce: {self.nonce}, " +\
+            f"Balance: {self.balance}, " +\
+            f"Storage: {self.storage}, " +\
+            f"Code: {self.code}, " +\
+            f"Code Hash: {self.code_hash}"
 
-def read_world_state(raw_state: str) -> dict:
+
+def parse_account(line: str) -> Account:
+    account_fields = line.split(';')
+
+    return Account(account_fields[0],       # Address
+                   int(account_fields[1]),  # Nonce
+                   int(account_fields[2]),  # Balance
+                   account_fields[3],       # Storage
+                   account_fields[4],       # Code
+                   account_fields[5],       # CodeHash
+                   )
+
+
+def read_world_state() -> dict:
     # TODO update
+    try:
+        with open("./Current-World-State-Number.txt", "r") as number_file:
+            number = int(number_file.read())
+
+        with open(f"./World-States/State_{number}.csv", "r") as state_file:
+            lines = [line.strip() for line in state_file.readlines()]
+
+        accounts = [parse_account(line) for line in lines[1:] if len(line) > 0]
+        world_state = {account.address: account for account in accounts}
+
+        return world_state, number
+
+    except Exception as exception:
+        revert(f"Failed to load world state!\nException: {exception}")
+
+    else:
+        print("World state loaded successfully.")
 
 
 def revert(message: str):
@@ -73,7 +121,14 @@ def revert(message: str):
 
 
 def unimplemented(opcode: str):
-    revert(f"Opcode: {opcode} is currnetly unimplemented!")
+    revert(f"Opcode: {opcode} is currently unimplemented!")
+
+
+def print_world_state(number: int):
+    print(f"World state {number}:")
+    for account in world_state.values():
+        print(str(account))
+    print()
 
 
 def is_account(address: str) -> bool:
@@ -83,33 +138,33 @@ def is_account(address: str) -> bool:
 def is_eoa(address: str) -> bool:
     if not is_account(address):
         return False
-    account = get_account(address)
+    account: Account = get_account(address)
 
-    if account.get("code") != ' ':
+    if not account.code.isEmpty:
         return False
 
     return True
 
 
-def get_account(address: str) -> dict:
-    account = world_state.get(address)
+def get_account(address: str) -> Account:
+    account: Account = world_state.get(address)
     if not account:
         revert("Account does not exist!")
     return account
 
 
-def get_eoa(address: str) -> dict:
-    account = get_account(address)
+def get_eoa(address: str) -> Account:
+    account: Account = get_account(address)
 
-    if account.get("code") != ' ':
+    if not account.code.isEmpty:
         revert("Account is not externally owned!")
 
     return account
 
 
 def get_balance(address: str) -> int:
-    account = get_account(address)
-    return account.get("balance")
+    account: Account = get_account(address)
+    return account.balance
 
 
 def check_balance(address: str, value: int):
@@ -117,33 +172,34 @@ def check_balance(address: str, value: int):
         revert("Balance too low!")
 
 
-def write_world_state():
+def write_world_state(number: int):
+    print_world_state(number)
     # TODO implement
     pass
 
 
 def transfer_ether(sender: str, receiver: str, value: int):
-    sender_account = get_eoa(sender)
-    receiver_account = get_eoa(receiver)
+    sender_account: Account = get_eoa(sender)
+    receiver_account: Account = get_eoa(receiver)
 
-    sender_account.update({"balance": get_balance(sender) - value})
-    receiver_account.update({"balance": get_balance(receiver) + value})
-    print(f"Transfered {value} from {sender} to {receiver}.")
+    sender_account.balance -= value
+    receiver_account.balance += value
+    print(f"Transfered {value} from {sender} to {receiver}.\n")
 
 
 def call_contract():
     # TODO
-    pass
+    print("Called contract TODO.\n")
 
 
 def create_eoa():
     # TODO
-    pass
+    print("Created new externally owned account at TODO.\n")
 
 
 def create_contract():
     # TODO
-    pass
+    print("Created new contract at TODO.\n")
 
 
 def transaction(sender:     str,
@@ -153,13 +209,10 @@ def transaction(sender:     str,
                 gas:        int):
 
     # Check sender validity (exists and is EOA)
-    sender_account: dict = get_eoa(sender)
+    sender_account: Account = get_eoa(sender)
 
     # Set transaction origin address
     tx_origin: str = sender
-
-    # Set nonce
-    nonce: int = sender_account.get("nonce")
 
     # Check sender balance
     check_balance(sender, value)
@@ -169,11 +222,11 @@ def transaction(sender:     str,
     # Call to account
     if is_account(receiver):
 
-        # Ether transfer    (EOA to EOA         |   no calldata)
+        # Ether transfer    (EOA to EOA)
         if is_eoa(receiver):
-            transfer_ether()
+            transfer_ether(sender, receiver, value)
 
-        # Call Contract     (EOA to contract)   |   abi encoded calldata)
+        # Call Contract     (abi encoded calldata)
         else:
             call_contract()
 
@@ -188,7 +241,7 @@ def transaction(sender:     str,
             create_contract()
 
     # Increase nonce
-    sender_account.update({"nonce": nonce + 1})
+    sender_account.nonce += 1
 
 
 if __name__ == "__main__":
@@ -202,9 +255,9 @@ if __name__ == "__main__":
     # data:     str         |   Calldata string (optional)
     # gas:      int         |   Maximum amount of gas for the transaction
 
-    i_from = "4838b106fce9647bdf1e7877bf73ce8b0bad5f40"
-    i_to = ""
-    i_value = 0
+    i_from = "0x4838b106fce9647bdf1e7877bf73ce8b0bad5f40"
+    i_to = "0x2056b106fce9647bdf1e7877bf73ce8b0bad5f40"
+    i_value = 10
     i_data = ""
     i_gas = 0
 
@@ -213,13 +266,14 @@ if __name__ == "__main__":
 
     # * Read most recent world state
     global world_state
+    global world_state_number
 
-    read_world_state()
+    world_state, world_state_number = read_world_state()
 
     if not world_state:
         revert("Loading world state failed!")
 
-    print(world_state)
+    print_world_state(world_state_number)
 
     # * Make transaction
     # Required parameters:
@@ -234,4 +288,5 @@ if __name__ == "__main__":
     transaction(i_from, i_to, i_value, i_data, i_gas)
 
     # Save new world state
-    write_world_state()
+    world_state_number += 1
+    write_world_state(world_state_number)

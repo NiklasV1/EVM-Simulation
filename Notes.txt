@@ -14,7 +14,8 @@ Address;Nonce;Balance;Storage;Code;CodeHash
 
 
 Address: 
-    - 20 byte address stored in hexadecimal
+    - 20 byte address stored in hexadecimal prepended with '0x'
+    - Example: 0x4838b106fce9647bdf1e7877bf73ce8b0bad5f40
 
 Nonce:
     - EOA: Number of transactions originating from this account
@@ -44,8 +45,8 @@ Examples:
 
 EOAs:
 Address;Nonce;Balance;Storage;Code;CodeHash
-x4838b106fce9647bdf1e7877bf73ce8b0bad5f40;0;5000;X;X;X
-x2056b106fce9647bdf1e7877bf73ce8b0bad5f40;0;3000;X;X;X
+0x4838b106fce9647bdf1e7877bf73ce8b0bad5f40;0;5000;X;X;X
+0x2056b106fce9647bdf1e7877bf73ce8b0bad5f40;0;3000;X;X;X
 
 TODO: contract example
 
