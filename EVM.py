@@ -1,4 +1,8 @@
 
+import argparse
+import re
+
+
 def parse_storage(raw_storage: str) -> dict:
     # TODO implement
     pass
@@ -148,6 +152,14 @@ def print_world_state(number: int):
     print()
 
 
+def is_address(input: str) -> bool:
+    return re.fullmatch("0x([a-f]|[A-F]|[0-9]){40}", input) is not None
+
+
+def is_bytecode(input: str) -> bool:
+    return re.fullmatch("(([a-f]|[A-F]|[0-9]){2})*", input) is not None
+
+
 def is_account(address: str) -> bool:
     return world_state.get(address) is not None
 
@@ -265,12 +277,8 @@ def transaction(sender:     str,
 
     # Call to empty address
     else:
-        # Create EOA (no calldata)
-        if calldata == "":
-            create_eoa()
-
         # Create Contract (bytecode calldata)
-        else:
+        if calldata != "":
             create_contract()
 
     # Increase nonce
@@ -282,20 +290,63 @@ if __name__ == "__main__":
     # * Read input parameters
     # Parameter format: --param_name=param_value
     # Parameters:
-    # from:     address     |   Sender account address (must be EOA)
-    # to:       address     |   Receiver address
+    # sender:   address     |   Sender account address (must be EOA)
+    # receiver: address     |   Receiver address
     # value:    int         |   Ether amount in Wei
     # data:     str         |   Calldata string (optional)
     # gas:      int         |   Maximum amount of gas for the transaction
 
-    i_from = "0x4838b106fce9647bdf1e7877bf73ce8b0bad5f40"
-    i_to = "0x2056b106fce9647bdf1e7877bf73ce8b0bad5f40"
-    i_value = 10
-    i_data = ""
-    i_gas = 0
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--create", action="store_true")
+    parser.add_argument("-s", "--sender", type=str)
+    parser.add_argument("-r", "--receiver", type=str)
+    parser.add_argument("-v", "--value", type=int)
+    parser.add_argument("-d", "--data", type=str)
+    parser.add_argument("-g", "--gas", type=int)
 
-    # TODO implement CLI input parameters
-    # TODO implement input validation
+    arguments = parser.parse_args()
+
+    if not arguments.create:
+        if arguments.sender is not None and is_address(arguments.sender):
+            i_from = arguments.sender
+        else:
+            revert("Invalid sender address!")
+
+        if arguments.receiver is not None and is_address(arguments.receiver):
+            i_to = arguments.receiver
+        else:
+            revert("Invalid receiver address!")
+
+        i_value = 0
+        if arguments.value is not None and arguments.value > 0:
+            i_value = arguments.value
+
+        i_data = ""
+        if arguments.data is not None:
+            i_data = arguments.data
+        if not is_bytecode(i_data):
+            revert("Invalid calldata value!")
+
+        i_gas = 0
+        if arguments.gas is not None and arguments.gas > 0:
+            i_gas = arguments.gas
+    else:
+        i_from = ""
+        i_to = ""
+        i_data = ""
+        i_gas = 0
+        i_value = 0
+        if arguments.value is not None and arguments.value > 0:
+            i_value = arguments.value
+
+    print(f"Create EOA: {arguments.create}")
+    print(f"From: {i_from}")
+    print(f"To: {i_to}")
+    print(f"Value: {i_value}")
+    print(f"Data: {i_data}")
+    print(f"Gas: {i_gas}")
+
+    revert("End")
 
     # * Read most recent world state
     global world_state
@@ -317,8 +368,11 @@ if __name__ == "__main__":
     # data:     str         |   Calldata string
     # gas:      int         |   Maximum amount of gas for the transaction
 
-    # Make transaction
-    transaction(i_from, i_to, i_value, i_data, i_gas)
+    # Make transaction or create new EOA
+    if arguments.create:
+        create_eoa(i_value)
+    else:
+        transaction(i_from, i_to, i_value, i_data, i_gas)
 
     # Save new world state
     world_state_number += 1
