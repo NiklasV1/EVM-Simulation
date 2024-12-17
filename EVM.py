@@ -346,8 +346,6 @@ if __name__ == "__main__":
     print(f"Data: {i_data}")
     print(f"Gas: {i_gas}")
 
-    revert("End")
-
     # * Read most recent world state
     global world_state
     global world_state_number
