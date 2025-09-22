@@ -1,15 +1,23 @@
 
 import argparse
 import re
+from Crypto.Hash import keccak
+import Crypto.Random as rnd
+
+
+def keccak_hash(input):
+    k = keccak.new(digest_bits=256)
+    k.update(bytes(input))
+    return k.hexdigest()
 
 
 def parse_storage(raw_storage: str) -> dict:
-    # TODO implement
+    # TODO: implement
     pass
 
 
 def parse_code(raw_code: str) -> list:
-    # TODO implement
+    # TODO: implement
     pass
 
 
@@ -29,13 +37,13 @@ class AccountStorage:
     def __str__(self) -> str:
         if self.isEmpty:
             return 'X'
-        # TODO
+        # TODO:
         return "storageTODO"
 
     def toCSV(self) -> str:
         if self.isEmpty:
             return 'X'
-        # TODO
+        # TODO:
         return "storageTODO"
 
 
@@ -115,7 +123,7 @@ def parse_account(line: str) -> Account:
 
 
 def read_world_state() -> dict:
-    # TODO update
+    # TODO: update
     try:
         with open("./Current-World-State-Number.txt", "r") as number_file:
             number = int(number_file.read())
@@ -201,6 +209,12 @@ def check_balance(address: str, value: int):
         revert("Balance too low!")
 
 
+def get_random_address():
+    address = "0x"
+    for i in range(40):
+        print(hex(rnd.random.randint(0, 15)))
+
+
 def write_world_state(number: int):
     print_world_state(number)
 
@@ -233,17 +247,18 @@ def transfer_ether(sender: str, receiver: str, value: int):
 
 
 def call_contract():
-    # TODO
+    # TODO:
     print("Called contract TODO.\n")
 
 
-def create_eoa():
-    # TODO
+def create_eoa(initial_balance: int):
+    new_address = get_random_address()
+
     print("Created new externally owned account at TODO.\n")
 
 
 def create_contract():
-    # TODO
+    # TODO:
     print("Created new contract at TODO.\n")
 
 
@@ -262,7 +277,7 @@ def transaction(sender:     str,
     # Check sender balance
     check_balance(sender, value)
 
-    # TODO implement gas usage
+    # TODO: implement gas usage
 
     # Call to account
     if is_account(receiver):
@@ -287,6 +302,7 @@ def transaction(sender:     str,
 
 if __name__ == "__main__":
 
+    # NOTE:
     # * Read input parameters
     # Parameter format: --param_name=param_value
     # Parameters:
@@ -357,6 +373,7 @@ if __name__ == "__main__":
 
     print_world_state(world_state_number)
 
+    # NOTE:
     # * Make transaction
     # Required parameters:
     # from:     address     |   Origin address
